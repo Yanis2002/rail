@@ -1,5 +1,4 @@
-// Import necessary libraries
-// We'll use plotly.js for plotting and numeric.js for numerical operations
+
 
 // Server setup (using Express.js instead of Flask)
 const express = require('express');
