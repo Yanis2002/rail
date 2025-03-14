@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rail Defect Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .assessment {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: inline-block;
+            color: white;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            flex: 1;
+            min-width: 200px;
+            margin-right: 10px;
+        }
+        .chart {
+            width: 100%;
+            height: 500px;
+        }
+        .defect-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 15px;
+        }
+        .defect-chart {
+            height: 300px;
+        }
+        @media (max-width: 768px) {
+            .defect-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Rail Defect Analysis System</h1>
+
+    <div class="container">
+        <h2>Rail Overview</h2>
+        <p>Visualization of two parallel rails. Red shows the first rail, green shows the second.</p>
+        <div id="railsChart" class="chart"></div>
+    </div>
+
+    <div class="container">
+        <h2>Analysis of First Rail</h2>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Top Profile Defect Integral</h3>
+                <p id="integralTop1">Loading...</p>
+            </div>
+            <div class="stat-box">
+                <h3>Bottom Profile Defect Integral</h3>
+                <p id="integralBottom1">Loading...</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Defect Integral</h3>
+                <p id="totalIntegral1">Loading...</p>
+            </div>
+        </div>
+
+        <h3>Condition Assessment:</h3>
+        <div id="assessment1" class="assessment">Loading...</div>
+
+        <div class="defect-charts">
+            <div id="topProfile1" class="defect-chart"></div>
+            <div id="bottomProfile1" class="defect-chart"></div>
+            <div id="topDiff1" class="defect-chart"></div>
+            <div id="bottomDiff1" class="defect-chart"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Analysis of Second Rail</h2>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Top Profile Defect Integral</h3>
+                <p id="integralTop2">Loading...</p>
+            </div>
+            <div class="stat-box">
+                <h3>Bottom Profile Defect Integral</h3>
+                <p id="integralBottom2">Loading...</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Defect Integral</h3>
+                <p id="totalIntegral2">Loading...</p>
+            </div>
+        </div>
+
+        <h3>Condition Assessment:</h3>
+        <div id="assessment2" class="assessment">Loading...</div>
+
+        <div class="defect-charts">
+            <div id="topProfile2" class="defect-chart"></div>
+            <div id="bottomProfile2" class="defect-chart"></div>
+            <div id="topDiff2" class="defect-chart"></div>
+            <div id="bottomDiff2" class="defect-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data from the API
+        fetch('/api/rail-data')
+            .then(response => response.json())
+            .then(data => {
+                // Display integral values
+                document.getElementById('integralTop1').textContent = data.integralTop1.toFixed(2) + ' mm²';
+                document.getElementById('integralBottom1').textContent = data.integralBottom1.toFixed(2) + ' mm²';
+                document.getElementById('totalIntegral1').textContent = data.totalIntegral1.toFixed(2) + ' mm²';
+                
+                document.getElementById('integralTop2').textContent = data.integralTop2.toFixed(2) + ' mm²';
+                document.getElementById('integralBottom2').textContent = data.integralBottom2.toFixed(2) + ' mm²';
+                document.getElementById('totalIntegral2').textContent = data.totalIntegral2.toFixed(2) + ' mm²';
+                
+                // Display assessments
+                const assessment1 = document.getElementById('assessment1');
+                assessment1.textContent = data.evaluation1.condition;
+                assessment1.style.backgroundColor = data.evaluation1.color;
+                
+                const assessment2 = document.getElementById('assessment2');
+                assessment2.textContent = data.evaluation2.condition;
+                assessment2.style.backgroundColor = data.evaluation2.color;
+                
+                // Plot rails overview
+                Plotly.newPlot('railsChart', data.railsData, {
+                    title: 'Railway Rail Profiles',
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { title: 'Height (mm)' }
+                });
+                
+                // Plot first rail analysis
+                // Top profile
+                Plotly.newPlot('topProfile1', data.defects1Data.topProfileData, {
+                    title: 'Top Rail Profile',
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Height (mm)',
+                        range: [data.defects1Data.yMin, data.defects1Data.yMax]
+                    }
+                });
+                
+                // Bottom profile
+                Plotly.newPlot('bottomProfile1', data.defects1Data.bottomProfileData, {
+                    title: 'Bottom Rail Profile',
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Height (mm)',
+                        range: [data.defects1Data.yMin, data.defects1Data.yMax]
+                    }
+                });
+                
+                // Top defects
+                Plotly.newPlot('topDiff1', data.defects1Data.topDiffData, {
+                    title: `Top Profile Defects (Integral: ${data.integralTop1.toFixed(2)} mm²)`,
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Defect (mm)',
+                        range: [0, data.defects1Data.diffMax]
+                    }
+                });
+                
+                // Bottom defects
+                Plotly.newPlot('bottomDiff1', data.defects1Data.bottomDiffData, {
+                    title: `Bottom Profile Defects (Integral: ${data.integralBottom1.toFixed(2)} mm²)`,
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Defect (mm)',
+                        range: [0, data.defects1Data.diffMax]
+                    }
+                });
+                
+                // Plot second rail analysis
+                // Top profile
+                Plotly.newPlot('topProfile2', data.defects2Data.topProfileData, {
+                    title: 'Top Rail Profile',
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Height (mm)',
+                        range: [data.defects2Data.yMin, data.defects2Data.yMax]
+                    }
+                });
+                
+                // Bottom profile
+                Plotly.newPlot('bottomProfile2', data.defects2Data.bottomProfileData, {
+                    title: 'Bottom Rail Profile',
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Height (mm)',
+                        range: [data.defects2Data.yMin, data.defects2Data.yMax]
+                    }
+                });
+                
+                // Top defects
+                Plotly.newPlot('topDiff2', data.defects2Data.topDiffData, {
+                    title: `Top Profile Defects (Integral: ${data.integralTop2.toFixed(2)} mm²)`,
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Defect (mm)',
+                        range: [0, data.defects2Data.diffMax]
+                    }
+                });
+                
+                // Bottom defects
+                Plotly.newPlot('bottomDiff2', data.defects2Data.bottomDiffData, {
+                    title: `Bottom Profile Defects (Integral: ${data.integralBottom2.toFixed(2)} mm²)`,
+                    xaxis: { title: 'Distance (cm)' },
+                    yaxis: { 
+                        title: 'Defect (mm)',
+                        range: [0, data.defects2Data.diffMax]
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
